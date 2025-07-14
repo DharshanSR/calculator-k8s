@@ -33,11 +33,12 @@ jobs:
         with:
           context: ./frontend
           push: true
-          tags: ghcr.io/dharshansr-frontend:latest
+          tags: ghcr.io/dharshansr/calculator-frontend:latest
+
 
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           push: true
-          tags: ghcr.io/dharshansr-backend:latest
+          tags: ghcr.io/dharshansr/calculator-backend:latest
