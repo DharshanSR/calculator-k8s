@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calculator-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: calculator-backend
+  template:
+    metadata:
+      labels:
+        app: calculator-backend
+    spec:
+      containers:
+      - name: calculator-backend
+        image: calculator-backend
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8081
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: calculator-backend
+spec:
+  selector:
+    app: calculator-backend
+  ports:
+    - protocol: TCP
+      port: 3001
+      targetPort: 8081
+  type: ClusterIP

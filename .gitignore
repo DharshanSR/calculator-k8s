@@ -1,0 +1,25 @@
+# Node dependencies
+node_modules/
+
+# Build outputs
+build/
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# dotenv environment variables
+.env
+
+# Docker
+*.tar
+*.pid
+
+# Optional: VS Code settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
