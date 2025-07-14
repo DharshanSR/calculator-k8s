@@ -127,12 +127,6 @@ This application follows a **microservices architecture** pattern with clean sep
 | Technology | Version | Purpose | Package Details |
 |------------|---------|---------|-----------------|
 | **React** | 19.1.0 | UI Framework | Core library for building user interfaces with modern hooks and concurrent features |
-| **React DOM** | 19.1.0 | DOM Rendering | Provides DOM-specific methods for React applications |
-| **React Scripts** | 5.0.1 | Build Tools | Create React App build scripts with Webpack, Babel, and development server |
-| **Testing Library (React)** | 16.3.0 | Testing Framework | Simple and complete testing utilities for React components |
-| **Testing Library (Jest DOM)** | 6.6.3 | Testing Matchers | Custom Jest matchers for DOM node assertions |
-| **Testing Library (User Event)** | 13.5.0 | User Interaction Testing | Fire events the same way users do in the browser |
-| **Web Vitals** | 2.1.4 | Performance Monitoring | Library for measuring Core Web Vitals performance metrics |
 | **Nginx** | Alpine | Web Server | High-performance HTTP server and reverse proxy |
 
 ### Backend Stack (Version 1.0.0)
@@ -156,8 +150,6 @@ This application follows a **microservices architecture** pattern with clean sep
 | Tool | Purpose | Configuration |
 |------|---------|---------------|
 | **npm** | Package Manager | Used for dependency management and script execution |
-| **Webpack** | Module Bundler | Configured via React Scripts for optimized builds |
-| **Babel** | JavaScript Compiler | Transpiles modern JavaScript for browser compatibility |
 | **ESLint** | Code Linting | Maintains code quality with React and Jest rules |
 
 ## Quick Start
@@ -182,7 +174,7 @@ This application follows a **microservices architecture** pattern with clean sep
    ```bash
    cd backend
    npm install
-   npm start
+   node index.js
    # Backend runs on http://localhost:8081
    ```
 
@@ -327,7 +319,7 @@ This application follows a **microservices architecture** pattern with clean sep
    
    # Port forwarding (alternative access method)
    kubectl port-forward service/calculator-frontend 8080:80
-   # Access via http://localhost:8080
+   # After running the above command, access the web application via http://localhost:8080
    ```
 
 4. **Monitor and manage the deployment:**
@@ -349,30 +341,45 @@ This application follows a **microservices architecture** pattern with clean sep
 
 ```
 calculator-app/
+├── .github/                   # GitHub Configuration
+│   ├── workflows/             # GitHub Actions workflows
+│   │   └── ci-cd.yaml         # CI/CD pipeline configuration
+│   └── README.md              # GitHub workflows documentation
 ├── backend/                    # Express.js Backend Service
+│   ├── .gitignore             # Backend gitignore
 │   ├── Dockerfile             # Backend container configuration
 │   ├── index.js               # Main application server
 │   ├── package.json           # Node.js dependencies
+│   ├── package-lock.json      # Dependency lock file
 │   └── README.md              # Backend documentation
 ├── frontend/                   # React Frontend Application
 │   ├── public/                # Static assets
+│   │   ├── favicon.ico        # Site favicon
 │   │   ├── index.html         # Main HTML template
+│   │   ├── logo192.png        # React logo (192px)
+│   │   ├── logo512.png        # React logo (512px)
 │   │   ├── manifest.json      # PWA manifest
 │   │   └── robots.txt         # SEO configuration
 │   ├── src/                   # Source code
 │   │   ├── App.css            # Application styles
 │   │   ├── App.js             # Main React component
 │   │   ├── App.test.js        # Component tests
+│   │   ├── index.css          # Global styles
 │   │   ├── index.js           # Application entry point
-│   │   └── reportWebVitals.js # Performance monitoring
+│   │   ├── logo.svg           # React logo SVG
+│   │   ├── reportWebVitals.js # Performance monitoring
+│   │   └── setupTests.js      # Test configuration
+│   ├── .gitignore             # Frontend gitignore
 │   ├── Dockerfile             # Frontend container configuration
 │   ├── default.conf           # Nginx configuration
 │   ├── package.json           # React dependencies
+│   ├── package-lock.json      # Dependency lock file
 │   └── README.md              # Frontend documentation
 ├── k8s/                       # Kubernetes Manifests
 │   ├── backend.yaml           # Backend deployment & service
 │   ├── frontend.yaml          # Frontend deployment & service
 │   └── README.md              # Kubernetes documentation
+├── .gitignore                 # Root gitignore
 └── README.md                  # This file
 ```
 
