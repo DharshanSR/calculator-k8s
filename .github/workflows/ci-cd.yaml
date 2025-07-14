@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*.*.*'
   pull_request:
 
 jobs:
@@ -15,8 +17,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_FRONTEND: ghcr.io/${{ github.repository }}-frontend
-      IMAGE_BACKEND: ghcr.io/${{ github.repository }}-backend
+      IMAGE_FRONTEND: ghcr.io/dharshansr/calculator-frontend
+      IMAGE_BACKEND: ghcr.io/dharshansr/calculator-backend
 
     steps:
       - name: Checkout code
@@ -32,17 +34,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get version tag
+        id: vars
+        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           push: true
-          tags: ghcr.io/dharshansr/calculator-frontend:latest
-
+          tags: |
+            ${{ env.IMAGE_FRONTEND }}:latest
+            ${{ env.IMAGE_FRONTEND }}:${{ env.TAG }}
 
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           push: true
-          tags: ghcr.io/dharshansr/calculator-backend:latest
+          tags: |
+            ${{ env.IMAGE_BACKEND }}:latest
+            ${{ env.IMAGE_BACKEND }}:${{ env.TAG }}
