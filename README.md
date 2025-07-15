@@ -654,4 +654,4 @@ For more information, check out the individual README files in the `backend/`, `
 - Persistent calculation history
 - User authentication and sessions
 - Advanced Kubernetes features (HPA, VPA)
-- Performance optimizations
+- Performance optimizations# trigger deployment
