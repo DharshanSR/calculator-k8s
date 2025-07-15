@@ -50,6 +50,19 @@ jobs:
           echo "${{ secrets.MINIKUBE_KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
           
+          # Debug: Check if kubeconfig has embedded certificates or file paths
+          echo "Checking kubeconfig format..."
+          if grep -q "certificate-authority-data" $HOME/.kube/config; then
+            echo "✅ Found embedded certificates"
+          else
+            echo "❌ Found file paths, need to embed certificates"
+            # Try to get server and create a simple token-based config
+            SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}' 2>/dev/null || echo "")
+            if [ -n "$SERVER" ]; then
+              echo "Server found: $SERVER"
+            fi
+          fi
+          
           # Verify connection to minikube
           kubectl cluster-info
           kubectl get nodes
@@ -128,6 +141,19 @@ jobs:
           mkdir -p $HOME/.kube
           echo "${{ secrets.MINIKUBE_KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
+          
+          # Debug: Check if kubeconfig has embedded certificates or file paths
+          echo "Checking kubeconfig format..."
+          if grep -q "certificate-authority-data" $HOME/.kube/config; then
+            echo "✅ Found embedded certificates"
+          else
+            echo "❌ Found file paths, need to embed certificates"
+            # Try to get server and create a simple token-based config
+            SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}' 2>/dev/null || echo "")
+            if [ -n "$SERVER" ]; then
+              echo "Server found: $SERVER"
+            fi
+          fi
       
       - name: Rollback deployment
         run: |
