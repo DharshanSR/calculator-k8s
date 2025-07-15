@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: calculator-frontend
-        image: calculator-frontend
+        image: calculator-frontend:v1.1.0
         imagePullPolicy: Never
         resources:
           requests:

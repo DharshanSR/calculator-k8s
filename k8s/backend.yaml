@@ -14,10 +14,25 @@ spec:
     spec:
       containers:
       - name: calculator-backend
-        image: calculator-backend
+        image: calculator-backend:v1.1.0
         imagePullPolicy: Never
         ports:
         - containerPort: 8081
+        env:
+        - name: NODE_ENV
+          value: "production"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 5
         resources:
           requests:
             cpu: "100m"
