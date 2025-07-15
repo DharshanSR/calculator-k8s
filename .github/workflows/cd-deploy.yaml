@@ -1,0 +1,140 @@
+name: CD - Deploy to Kubernetes
+
+permissions:
+  contents: read
+  packages: read
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types:
+      - completed
+    branches:
+      - main
+
+env:
+  IMAGE_FRONTEND: ghcr.io/dharshansr/calculator-frontend
+  IMAGE_BACKEND: ghcr.io/dharshansr/calculator-backend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set deployment variables
+        id: vars
+        run: |
+          # Use main branch tag for automatic deployment after CI
+          IMAGE_TAG="main"
+          DEPLOY_ENV="development"
+          
+          echo "DEPLOY_ENV=$DEPLOY_ENV" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "NAMESPACE=calculator-$DEPLOY_ENV" >> $GITHUB_ENV
+          
+          echo "Deploying to environment: $DEPLOY_ENV"
+          echo "Using image tag: $IMAGE_TAG"
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl for minikube cluster
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.MINIKUBE_KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+          
+          # Verify connection to minikube
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Create namespace if not exists
+        run: |
+          kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Update Kubernetes manifests with new image tags
+        run: |
+          # Update backend deployment
+          sed -i "s|image: calculator-backend|image: ${{ env.IMAGE_BACKEND }}:${{ env.IMAGE_TAG }}|g" k8s/backend.yaml
+          sed -i "s|imagePullPolicy: Never|imagePullPolicy: Always|g" k8s/backend.yaml
+          
+          # Update frontend deployment  
+          sed -i "s|image: calculator-frontend|image: ${{ env.IMAGE_FRONTEND }}:${{ env.IMAGE_TAG }}|g" k8s/frontend.yaml
+          sed -i "s|imagePullPolicy: Never|imagePullPolicy: Always|g" k8s/frontend.yaml
+          
+          echo "Updated manifests:"
+          echo "--- Backend ---"
+          grep -A 5 -B 5 "image:" k8s/backend.yaml
+          echo "--- Frontend ---"
+          grep -A 5 -B 5 "image:" k8s/frontend.yaml
+
+      - name: Deploy backend to Kubernetes
+        run: |
+          kubectl apply -f k8s/backend.yaml -n ${{ env.NAMESPACE }}
+          kubectl rollout status deployment/calculator-backend -n ${{ env.NAMESPACE }} --timeout=300s
+
+      - name: Deploy frontend to Kubernetes
+        run: |
+          kubectl apply -f k8s/frontend.yaml -n ${{ env.NAMESPACE }}
+          kubectl rollout status deployment/calculator-frontend -n ${{ env.NAMESPACE }} --timeout=300s
+
+      - name: Verify deployment
+        run: |
+          echo "=== Deployment Status ==="
+          kubectl get deployments -n ${{ env.NAMESPACE }}
+          
+          echo "=== Pod Status ==="
+          kubectl get pods -n ${{ env.NAMESPACE }}
+          
+          echo "=== Service Status ==="
+          kubectl get services -n ${{ env.NAMESPACE }}
+          
+          echo "=== Recent Events ==="
+          kubectl get events -n ${{ env.NAMESPACE }} --sort-by='.lastTimestamp' | tail -10
+
+      - name: Get application URLs
+        run: |
+          echo "=== Application Access Information ==="
+          
+          # Get NodePort for frontend
+          FRONTEND_NODEPORT=$(kubectl get service calculator-frontend -n ${{ env.NAMESPACE }} -o jsonpath='{.spec.ports[0].nodePort}')
+          echo "Frontend NodePort: $FRONTEND_NODEPORT"
+          
+          # Get minikube IP
+          echo "Minikube cluster IP: $(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')"
+          
+          echo "=== Access your calculator application ==="
+          echo "URL: http://$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}'):$FRONTEND_NODEPORT"
+
+  rollback:
+    runs-on: ubuntu-latest
+    if: failure()
+    needs: deploy
+    
+    steps:
+      - name: Setup kubectl for rollback
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl for minikube cluster
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.MINIKUBE_KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+      
+      - name: Rollback deployment
+        run: |
+          echo "Deployment failed, initiating rollback..."
+          kubectl rollout undo deployment/calculator-backend -n calculator-development
+          kubectl rollout undo deployment/calculator-frontend -n calculator-development
+          
+          echo "Rollback completed. Checking status..."
+          kubectl rollout status deployment/calculator-backend -n calculator-development
+          kubectl rollout status deployment/calculator-frontend -n calculator-development
