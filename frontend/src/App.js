@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import './App.css';
 
 function App() {
   const [num1, setNum1] = useState('');
@@ -6,6 +7,15 @@ function App() {
   const [operation, setOperation] = useState('add');
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [backendVersion, setBackendVersion] = useState('');
+
+  useEffect(() => {
+    // Fetch backend version on component mount
+    fetch('/version')
+      .then(res => res.json())
+      .then(data => setBackendVersion(data.version))
+      .catch(() => setBackendVersion('unknown'));
+  }, []);
 
   const calculate = async () => {
     setError('');
@@ -39,45 +49,65 @@ function App() {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: 'auto', padding: 20, fontFamily: 'Arial' }}>
-      <h2>🧮 Calculator</h2>
+    <div className="calculator-container">
+      <div className="calculator-card">
+        <div className="header">
+          <h2>🧮 Enhanced Calculator</h2>
+          <div className="version-info">
+            <span>Frontend: v1.1.0</span>
+            <span>Backend: v{backendVersion}</span>
+          </div>
+        </div>
 
-      <input
-        type="number"
-        value={num1}
-        onChange={e => setNum1(e.target.value)}
-        placeholder="Number 1"
-        style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-      />
+        <div className="input-group">
+          <input
+            type="number"
+            value={num1}
+            onChange={e => setNum1(e.target.value)}
+            placeholder="Enter first number"
+            className="number-input"
+          />
 
-      <input
-        type="number"
-        value={num2}
-        onChange={e => setNum2(e.target.value)}
-        placeholder="Number 2"
-        style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-      />
+          <input
+            type="number"
+            value={num2}
+            onChange={e => setNum2(e.target.value)}
+            placeholder="Enter second number"
+            className="number-input"
+          />
 
-      <select
-        value={operation}
-        onChange={e => setOperation(e.target.value)}
-        style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-      >
-        <option value="add">Add (+)</option>
-        <option value="subtract">Subtract (-)</option>
-        <option value="multiply">Multiply (×)</option>
-        <option value="divide">Divide (÷)</option>
-      </select>
+          <select
+            value={operation}
+            onChange={e => setOperation(e.target.value)}
+            className="operation-select"
+          >
+            <option value="add">➕ Addition</option>
+            <option value="subtract">➖ Subtraction</option>
+            <option value="multiply">✖️ Multiplication</option>
+            <option value="divide">➗ Division</option>
+          </select>
 
-      <button
-        onClick={calculate}
-        style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', border: 'none' }}
-      >
-        Calculate
-      </button>
+          <button
+            onClick={calculate}
+            className="calculate-button"
+            disabled={!num1 || !num2}
+          >
+            Calculate Result
+          </button>
+        </div>
 
-      {result !== null && <p style={{ marginTop: '15px' }}><strong>Result:</strong> {result}</p>}
-      {error && <p style={{ marginTop: '15px', color: 'red' }}><strong>Error:</strong> {error}</p>}
+        {result !== null && (
+          <div className="result-display success">
+            <strong>Result: {result}</strong>
+          </div>
+        )}
+        
+        {error && (
+          <div className="result-display error">
+            <strong>Error: {error}</strong>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
