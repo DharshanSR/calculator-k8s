@@ -10,7 +10,34 @@
 
 A modern, cloud-native calculator application built with microservices architecture, featuring a React frontend and Express.js backend, fully containerized and Kubernetes-ready for scalable deployment.
 
-**Current Version: v1.0.0** - Production ready release with complete Docker and Kubernetes support.
+**Current Version: v1.1.0** - Enhanced release with improved UI, health checks, and version tracking.
+
+## Quick Start
+
+🚀 **Deploy in 3 simple steps:**
+
+```bash
+# 1. Start Minikube (if not running)
+minikube start
+
+# 2. Run the automated deployment script
+./deploy.sh
+
+# 3. Access the application
+kubectl port-forward service/calculator-frontend 8080:80
+# Open http://localhost:8080 in your browser
+```
+
+**Alternative manual deployment:**
+```bash
+# Configure Docker environment
+eval $(minikube docker-env)
+
+# Build and deploy
+docker build -t calculator-backend:v1.1.0 ./backend
+docker build -t calculator-frontend:v1.1.0 ./frontend
+kubectl apply -f k8s/
+```
 
 ## Architecture Overview
 
@@ -641,17 +668,34 @@ For more information, check out the individual README files in the `backend/`, `
 - **Automated builds triggered on push and pull requests**
 - **Multi-environment deployment support with proper tagging**
 
+### Changelog
+
+#### v1.1.0 (Latest - July 15, 2025)
+- ✨ **Enhanced UI**: Beautiful gradient design with improved styling and responsiveness
+- 🏥 **Health Check Endpoint**: Added `/health` endpoint for better monitoring and Kubernetes probes
+- 📊 **Version Tracking**: Added `/version` endpoint and version display in frontend
+- 🎨 **Improved UX**: Better input validation, disabled button states, and enhanced error handling
+- 🔧 **Kubernetes Enhancements**: Added liveness and readiness probes for better reliability
+- 📦 **Updated Docker Images**: Optimized builds with v1.1.0 tags
+- 🚀 **Deployment Scripts**: Added automated deployment and cleanup scripts
+
+#### v1.0.0 (Initial Release)
+- 🧮 Basic calculator functionality (add, subtract, multiply, divide)
+- 🐳 Docker containerization for both frontend and backend
+- ☸️ Kubernetes deployment configurations
+- 🌐 React frontend with Express.js backend
+- 📋 Complete documentation and deployment guides
+
 ### Upcoming Releases
 
-#### v1.1.0 (Planned)
-- Advanced mathematical operations (power, square root, etc.)
-- Calculator history and memory functions
-- Enhanced UI with themes and accessibility
-- Prometheus metrics integration
-
 #### v1.2.0 (Planned)
+- Advanced mathematical operations (power, square root, logarithm)
+- Calculator history and memory functions  
 - Scientific calculator mode
-- Persistent calculation history
+- Prometheus metrics integration for monitoring
+
+#### v1.3.0 (Planned)
 - User authentication and sessions
+- Persistent calculation history
 - Advanced Kubernetes features (HPA, VPA)
-- Performance optimizations# trigger deployment
+- Multi-theme support and accessibility improvements# trigger deployment
