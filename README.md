@@ -6,6 +6,7 @@
 [![Express](https://img.shields.io/badge/Express-4.18.2-lightgrey.svg)](https://expressjs.com/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-326ce5.svg)](https://kubernetes.io/)
+[![Medium Article](https://img.shields.io/badge/Medium-Article-12100E.svg?logo=medium&logoColor=white)](https://medium.com/@dharshanravindran8/building-a-modern-calculator-with-kubernetes-a-full-stack-cloud-native-journey-f1bc7a336cfc)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A modern, cloud-native calculator application built with microservices architecture, featuring a React frontend and Express.js backend, fully containerized and Kubernetes-ready for scalable deployment.
@@ -38,6 +39,22 @@ docker build -t calculator-backend:v1.1.0 ./backend
 docker build -t calculator-frontend:v1.1.0 ./frontend
 kubectl apply -f k8s/
 ```
+
+## 📝 Blog Posts & Articles
+
+### Featured Article
+
+📖 **[Building a Modern Calculator with Kubernetes: A Full-Stack Cloud-Native Journey](https://medium.com/@dharshanravindran8/building-a-modern-calculator-with-kubernetes-a-full-stack-cloud-native-journey-f1bc7a336cfc)** - Medium
+
+A comprehensive step-by-step guide that walks you through the entire process of building this cloud-native calculator application. Learn how to:
+
+- 🏗️ **Design microservices architecture** with React frontend and Express.js backend
+- 🐳 **Containerize applications** using Docker with multi-stage builds
+- ☸️ **Deploy on Kubernetes** with proper service discovery and load balancing
+- 🔧 **Implement DevOps practices** with CI/CD pipelines and automated deployments
+- 📊 **Monitor and scale** applications in production environments
+
+*Perfect for developers looking to learn modern cloud-native development practices and Kubernetes deployment strategies.*
 
 ## Architecture Overview
 
