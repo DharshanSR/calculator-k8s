@@ -45,97 +45,246 @@ This application follows a **microservices architecture** pattern with clean sep
 
 ### Complete System Architecture
 
-```
-┌────────────────────────────────────────────────────────────────────────────────┐
-│                              KUBERNETES CLUSTER                                │
-│                                                                                │
-│  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │                         MINIKUBE (LOCAL DEV)                            │   │
-│  │                                                                         │   │
-│  │  ┌───────────────────────────────────────────────────────────────────┐  │   │
-│  │  │                     KUBERNETES MASTER NODE                        │  │   │
-│  │  │                                                                   │  │   │
-│  │  │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐    │  │   │
-│  │  │  │   API Server    │  │   Scheduler     │  │  Controller     │    │  │   │
-│  │  │  │                 │  │                 │  │   Manager       │    │  │   │
-│  │  │  └─────────────────┘  └─────────────────┘  └─────────────────┘    │  │   │
-│  │  └───────────────────────────────────────────────────────────────────┘  │   │
-│  │                                    │                                    │   │
-│  │                                    ▼                                    │   │
-│  │  ┌───────────────────────────────────────────────────────────────────┐  │   │
-│  │  │                    KUBERNETES WORKER NODE                         │  │   │
-│  │  │                                                                   │  │   │
-│  │  │  ┌─────────────────────────────────────────────────────────────┐  │  │   │
-│  │  │  │                    FRONTEND POD                             │  │  │   │
-│  │  │  │                                                             │  │  │   │
-│  │  │  │  ┌─────────────────┐      ┌─────────────────┐               │  │  │   │
-│  │  │  │  │  React Frontend │ ◄──► │     Nginx       │               │  │  │   │
-│  │  │  │  │   (Port 3000)   │      │   (Port 80)     │               │  │  │   │
-│  │  │  │  │                 │      │                 │               │  │  │   │
-│  │  │  │  └─────────────────┘      └─────────────────┘               │  │  │   │
-│  │  │  └─────────────────────────────────────────────────────────────┘  │  │   │
-│  │  │                                    │                              │  │   │
-│  │  │                             HTTP/REST API                         │  │   │
-│  │  │                                    │                              │  │   │
-│  │  │                                    ▼                              │  │   │
-│  │  │  ┌─────────────────────────────────────────────────────────────┐  │  │   │
-│  │  │  │                    BACKEND POD                              │  │  │   │
-│  │  │  │                                                             │  │  │   │
-│  │  │  │  ┌─────────────────┐      ┌─────────────────┐               │  │  │   │
-│  │  │  │  │ Express Backend │ ◄──► │     Node.js     │               │  │  │   │
-│  │  │  │  │   (Port 8081)   │      │   Runtime       │               │  │  │   │
-│  │  │  │  │                 │      │                 │               │  │  │   │
-│  │  │  │  └─────────────────┘      └─────────────────┘               │  │  │   │
-│  │  │  └─────────────────────────────────────────────────────────────┘  │  │   │
-│  │  │                                                                   │  │   │
-│  │  │  ┌─────────────────────────────────────────────────────────────┐  │  │   │
-│  │  │  │                  KUBERNETES SERVICES                        │  │  │   │
-│  │  │  │                                                             │  │  │   │
-│  │  │  │  ┌─────────────────┐      ┌─────────────────┐               │  │  │   │
-│  │  │  │  │ Frontend Service│      │ Backend Service │               │  │  │   │
-│  │  │  │  │  (NodePort)     │      │  (ClusterIP)    │               │  │  │   │
-│  │  │  │  │                 │      │                 │               │  │  │   │
-│  │  │  │  └─────────────────┘      └─────────────────┘               │  │  │   │
-│  │  │  └─────────────────────────────────────────────────────────────┘  │  │   │
-│  │  └───────────────────────────────────────────────────────────────────┘  │   │
-│  └─────────────────────────────────────────────────────────────────────────┘   │
-└────────────────────────────────────────────────────────────────────────────────┘
-                                           │
-                                           ▼
-                                    Docker Engine
-                                           │
-                                           ▼
-                              ┌─────────────────────────┐
-                              │      HOST MACHINE       │
-                              │   (Linux/macOS/Windows) │
-                              └─────────────────────────┘
-```
+![Kubernetes Calculator Architecture](frontend/public/K8S-CalculatorDiagram.png)
 
 ### Architecture Components Explained
 
-#### **Frontend Layer**
-- **React Application**: Modern, responsive single-page application built with React 19.1.0
-- **Nginx Web Server**: Serves static files and acts as a reverse proxy
-- **Docker Container**: Multi-stage build for optimized production deployment
-- **Kubernetes Pod**: Managed by Kubernetes with resource limits and health checks
+This section provides a detailed breakdown of each component in the architecture diagram above, explaining their roles, ports, connections, and how they work together.
 
-#### **Backend Layer**
-- **Express.js API**: RESTful API server handling mathematical operations
-- **Node.js Runtime**: Lightweight, fast JavaScript runtime environment
-- **Docker Container**: Containerized for consistent deployment across environments
-- **Kubernetes Pod**: Auto-scaling and self-healing capabilities
+---
 
-#### **Kubernetes Orchestration**
-- **Minikube**: Local Kubernetes cluster for development and testing
-- **Master Node**: Controls the cluster, schedules workloads, and manages state
-- **Worker Node**: Runs application pods and handles actual workloads
-- **Services**: Provide stable networking and service discovery
-- **Deployments**: Manage pod lifecycle, rolling updates, and scaling
+#### **🎯 Kubernetes Cluster Layer**
 
-#### **Container Runtime**
-- **Docker Engine**: Containerization platform ensuring consistency across environments
-- **Image Registry**: Stores and distributes container images
-- **Volume Management**: Persistent storage for application data
+**Purpose**: Container orchestration platform that automates deployment, scaling, and management of containerized applications.
+
+##### **Minikube (Local Development Environment)**
+- **What it is**: Single-node Kubernetes cluster that runs locally on your machine
+- **Purpose**: Provides a lightweight K8s environment for development and testing
+- **Resource Allocation**: Typically 2 CPUs, 4GB RAM for this application
+- **Network**: Creates a virtual network isolated from your host machine
+
+##### **Kubernetes Master Node (Control Plane)**
+The brain of the Kubernetes cluster that makes all the decisions:
+
+1. **API Server (Port 6443)**
+   - **Function**: REST API gateway for all cluster operations
+   - **Communication**: Receives kubectl commands and API requests
+   - **Security**: Handles authentication and authorization
+   - **Example**: When you run `kubectl apply -f k8s/`, it talks to this server
+
+2. **Scheduler**
+   - **Function**: Decides which worker node should run each pod
+   - **Logic**: Considers resource requirements, node capacity, and constraints
+   - **Example**: Places frontend pod on a node with sufficient CPU/memory
+
+3. **Controller Manager**
+   - **Function**: Maintains desired state of cluster resources
+   - **Tasks**: Ensures correct number of pod replicas are running
+   - **Auto-healing**: Restarts failed pods automatically
+
+---
+
+#### **🚀 Application Layer (Worker Node)**
+
+##### **Frontend Pod**
+**Resource Limits**: 250m CPU (quarter core), 256Mi RAM
+
+**Container 1: React Frontend Development**
+- **Port**: 3000 (internal development server)
+- **Purpose**: Serves the React application during development
+- **Build Process**: 
+  ```bash
+  npm install → npm run build → Static files generated
+  ```
+- **Files Served**: HTML, CSS, JavaScript, images from `/build` directory
+
+**Container 2: Nginx Web Server**
+- **Port**: 80 (HTTP standard port)
+- **Purpose**: Production web server that serves static files
+- **Configuration**: Custom `default.conf` for routing and optimization
+- **Performance**: Handles thousands of concurrent connections efficiently
+- **Security**: Configured with security headers and best practices
+
+**🔗 Connection Arrow (127.0.1)**:
+- **Meaning**: Internal localhost communication between React dev server and Nginx
+- **Data Flow**: Nginx proxies requests to React dev server during development
+- **Production**: Nginx directly serves pre-built static files
+
+##### **Backend Pod**
+**Resource Limits**: 500m CPU (half core), 256Mi RAM
+
+**Container 1: Express.js Backend**
+- **Port**: 8081 (custom API port)
+- **Endpoints Available**:
+  - `POST /calculate` - Performs mathematical operations
+  - `GET /health` - Health check for Kubernetes probes
+  - `GET /version` - Returns application version
+- **Request Handling**: Processes HTTP requests and returns JSON responses
+- **Validation**: Input validation for mathematical operations
+- **Error Handling**: Comprehensive error responses (e.g., division by zero)
+
+**Container 2: Node.js Runtime**
+- **Purpose**: JavaScript runtime environment using V8 engine
+- **Features**: Event-driven, non-blocking I/O for high performance
+- **Memory Management**: Automatic garbage collection
+- **Process**: Single main process with event loop
+
+**🔗 Connection Arrow (IPC)**:
+- **Meaning**: Inter-Process Communication between Express app and Node.js runtime
+- **Data Flow**: Node.js executes Express.js application code
+- **Performance**: Efficient in-memory communication
+
+---
+
+#### **📡 Service Layer (Network Abstraction)**
+
+##### **Frontend Service (NodePort)**
+- **Type**: NodePort - Exposes service on each node's IP at a static port
+- **Port Mapping**: External 8080 → Internal 80
+- **Access Method**: `http://localhost:8080` or `minikube service calculator-frontend --url`
+- **Purpose**: Provides stable network endpoint for frontend access
+- **Load Balancing**: Distributes traffic across multiple frontend pod replicas
+- **Label Selector**: `app=calculator-frontend` (connects to matching pods)
+- **Pod Discovery**: Automatically finds pods with matching labels
+
+##### **Backend Service (ClusterIP)**
+- **Type**: ClusterIP - Only accessible within the cluster
+- **Port**: 8081 (matches container port)
+- **Internal DNS**: `calculator-backend.default.svc.cluster.local`
+- **Purpose**: Provides service discovery for frontend-to-backend communication
+- **Security**: Not exposed to external traffic, internal-only access
+- **Label Selector**: `app=calculator-backend` (connects to matching pods)
+- **Pod Discovery**: Automatically finds pods with matching labels
+
+##### **🔗 Service-to-Pod Connection Mechanism**
+
+**Label Selector Magic**:
+1. **Service Definition**: Each service defines a `selector` that matches pod labels
+2. **Pod Labels**: Pods are labeled with `app=calculator-frontend` or `app=calculator-backend`
+3. **Automatic Discovery**: Kubernetes continuously monitors for pods with matching labels
+4. **Endpoint Creation**: Service automatically creates endpoints for each matching pod
+5. **Traffic Routing**: Service uses iptables rules to route traffic to pod IPs
+
+**Traffic Flow Visualization**:
+```
+External Request → NodePort Service → Service Endpoint → Pod IP:Port
+     ↓                    ↓                ↓              ↓
+http://localhost:8080 → Service:80 → Endpoint Tracker → 10.244.0.5:80
+```
+
+**Service Endpoint Management**:
+- **Pod IP Assignment**: Each pod gets a unique cluster IP (e.g., 10.244.0.5, 10.244.0.6)
+- **Health Monitoring**: Service only routes to healthy pods (readiness probes)
+- **Dynamic Updates**: When pods restart, service endpoints update automatically
+- **Load Balancing**: Round-robin distribution across available pod endpoints
+
+**🔗 HTTP/REST API Connection Arrow**:
+- **Route**: Frontend → Backend Service → Backend Pod
+- **Protocol**: HTTP/HTTPS with JSON payloads
+- **Example Request**:
+  ```javascript
+  fetch('/api/calculate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ num1: 10, num2: 5, operation: 'add' })
+  })
+  ```
+- **Load Balancing**: Service automatically distributes requests across backend pods
+- **Service Discovery**: Frontend uses service name `calculator-backend:8081` instead of pod IPs
+
+---
+
+#### **🐳 Docker Engine Layer**
+
+**Purpose**: Container runtime that creates and manages application containers from images.
+
+##### **Container Images (Build Stage)**
+
+**Frontend Image (Multi-stage Build)**:
+```dockerfile
+# Stage 1: Build Stage (node:18-alpine)
+- Install dependencies: npm install
+- Build production files: npm run build
+- Output: Optimized static files in /build directory
+
+# Stage 2: Runtime Stage (nginx:alpine)
+- Copy built files to /usr/share/nginx/html
+- Configure Nginx with custom default.conf
+- Expose port 80
+- Final size: ~25MB (very lightweight)
+```
+
+**Backend Image (Single-stage Build)**:
+```dockerfile
+# Production Image (node:18-alpine)
+- Copy package.json and package-lock.json
+- Install production dependencies: npm ci --only=production
+- Copy application source code
+- Expose port 8081
+- Start command: node index.js
+- Final size: ~150MB
+```
+
+##### **Running Containers (Runtime)**
+
+**Frontend Container Runtime**:
+- **Process**: Nginx master process + worker processes
+- **Memory Usage**: ~128Mi actual (256Mi limit)
+- **CPU Usage**: ~100m actual (250m limit)
+- **Network**: Bridge mode with port mapping
+- **Volume Mount**: Static files mounted at `/usr/share/nginx/html`
+- **Health Check**: HTTP GET request to port 80
+
+**Backend Container Runtime**:
+- **Process**: Single Node.js process running Express app
+- **Memory Usage**: ~128Mi actual (256Mi limit)
+- **CPU Usage**: ~100m actual (500m limit)
+- **Network**: Bridge mode with port mapping
+- **Working Directory**: `/app`
+- **Health Check**: HTTP GET request to `/health` endpoint
+
+---
+
+#### **🖥️ Host Machine Layer**
+
+**Purpose**: Physical or virtual machine that runs Docker and Kubernetes.
+
+##### **Port Mapping**:
+- **8080 → Frontend:80**: External access to web application
+- **8081 → Backend:8081**: Direct API access (optional, usually through frontend)
+
+##### **Network Interface**:
+- **Docker Bridge Network**: Isolated network for containers
+- **Minikube VM Network**: Virtual network for Kubernetes cluster
+- **Host Network**: Your machine's network interface
+
+---
+
+#### **🔄 Data Flow Examples**
+
+##### **User Calculation Request Flow**:
+1. **User Input**: User enters "10 + 5" in browser at `http://localhost:8080`
+2. **Frontend**: React app validates input and prepares API request
+3. **Service Discovery**: Frontend calls `calculator-backend:8081/calculate`
+4. **Load Balancing**: Kubernetes service routes to available backend pod
+5. **Processing**: Express.js processes calculation and returns result
+6. **Response**: Result flows back through the same path
+7. **Display**: React app displays "15" to the user
+
+##### **Health Check Flow**:
+1. **Kubernetes Probe**: Sends GET request to `/health` endpoint every 10 seconds
+2. **Backend Response**: Express.js returns `{ status: 'healthy', timestamp: '...' }`
+3. **Pod Status**: Kubernetes marks pod as healthy and continues routing traffic
+4. **Auto-healing**: If health check fails, Kubernetes restarts the pod
+
+##### **Scaling Flow**:
+1. **Scale Command**: `kubectl scale deployment calculator-backend --replicas=3`
+2. **Controller Manager**: Creates 2 additional backend pods
+3. **Scheduler**: Places new pods on available worker nodes
+4. **Service Update**: Automatically includes new pods in load balancing
+5. **Traffic Distribution**: Requests now distributed across 3 backend pods
+
+This architecture provides **high availability**, **scalability**, and **maintainability** while keeping the complexity manageable for both development and production environments.
 
 ### Key Features
 
